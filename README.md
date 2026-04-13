@@ -1,5 +1,7 @@
 # ChronoPlanner
 
+[🇨🇳 中文](./README-CN.md) | 🇬🇧 English
+
 > A Claude skill that builds your daily schedule around your biology — not a generic template.
 
 ChronoPlanner is a Claude skill that generates science-based daily plans grounded in **circadian rhythm research**, **attention span science**, and **dopamine regulation principles**. Instead of asking you to fill a calendar top-to-bottom, it matches each task to the time window where your brain is biologically primed to handle it.
