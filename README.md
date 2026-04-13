@@ -17,6 +17,7 @@ Most AI planners treat all hours as equal. ChronoPlanner doesn't.
 It calculates your personal energy windows relative to your actual wake-up time, then schedules tasks accordingly — deep focus when cortisol peaks, admin during the trough, review before sleep. It also handles the practical friction that kills real plans: location changes, commute buffers, fixed anchor events, and fatigue prediction.
 
 **Core principles built in:**
+- Auto-scans Google Calendar, Google Tasks, and Gmail before asking anything
 - Cortisol Awakening Response (CAR) and BDNF timing
 - Attention Residue Effect (23-minute recovery after task switches)
 - Dopamine cool-down before deep work
@@ -66,12 +67,31 @@ Copy the full contents of `SKILL.md` and paste it into your system prompt field.
 
 ## How It Works
 
-ChronoPlanner opens with a single combined message covering the three essential questions, then asks follow-up questions only for information that's missing. If you provide everything upfront, it skips straight to generating your plan.
+ChronoPlanner starts by silently scanning your connected tools to pre-populate your plan, then asks only for what's still missing.
+
+### Step 0: Pre-Scan (Automatic)
+
+Before any questions, ChronoPlanner checks your connected tools:
+
+| Tool | What It Does | Required |
+|------|-------------|----------|
+| Google Calendar | Fetches today's events → auto-locked as fixed anchors | Always (if connected) |
+| Google Tasks | Fetches your task list → suggested for confirmation | Optional |
+| Gmail / Outlook | Scans for actionable emails → surfaced for you to add | Optional |
+
+Results are shown in a single summary before the questionnaire starts:
+> "📅 Calendar: 2 events locked · ✅ Tasks: 4 found · 📧 Inbox: 2 actionable items"
+
+Tools that aren't connected are skipped silently — no error messages.
+
+### Step 1–6: Intake Questionnaire
+
+ChronoPlanner then asks only for what the pre-scan didn't already answer.
 
 | Round | What It Asks | When |
 |-------|-------------|------|
-| 1–3 (combined) | Wake-up time, plan scope, fixed anchor events | Always, in one message |
-| 4 | Today's task list | Only if not provided |
+| 1–3 (combined) | Wake-up time, plan scope, fixed anchor events | Always, in one message — skips anything pre-filled by calendar |
+| 4 | Today's task list | Only if not provided and not found in Google Tasks |
 | 5 | Duration, priority, and location per task | Only for missing fields, one task at a time |
 | 6 | Focus level today + target end time | Always |
 
