@@ -4,6 +4,8 @@
 
 ChronoPlanner is a Claude skill that generates science-based daily plans grounded in **circadian rhythm research**, **attention span science**, and **dopamine regulation principles**. Instead of asking you to fill a calendar top-to-bottom, it matches each task to the time window where your brain is biologically primed to handle it.
 
+Also available in Chinese: [SKILL-CN.md](./SKILL-CN.md)
+
 ---
 
 ## What Makes It Different
@@ -20,6 +22,9 @@ It calculates your personal energy windows relative to your actual wake-up time,
 - Eat the Frog — hardest task in the peak window
 - Active + Passive task stacking during commutes
 - Fatigue prediction — admin tasks when energy drops, not deep work
+- Deferred commute scheduling — commute blocks placed right before the destination task, not stranded hours early
+- Auto-inferred lunch block when not specified
+- Google Calendar sync — adds the full plan to your calendar after generation
 
 ---
 
@@ -48,7 +53,7 @@ It calculates your personal energy windows relative to your actual wake-up time,
 ```bash
 mkdir -p ~/.claude/skills/chronoplanner
 curl -o ~/.claude/skills/chronoplanner/SKILL.md \
-  https://raw.githubusercontent.com/YOUR_USERNAME/chronoplanner/main/SKILL.md
+  https://raw.githubusercontent.com/yitong0322/chronoplanner/main/SKILL.md
 ```
 
 ### Option C — System Prompt (any Claude interface or API)
@@ -59,18 +64,16 @@ Copy the full contents of `SKILL.md` and paste it into your system prompt field.
 
 ## How It Works
 
-ChronoPlanner runs a structured intake questionnaire before generating any plan. It collects only what it needs — skipping questions you've already answered in your message.
+ChronoPlanner opens with a single combined message covering the three essential questions, then asks follow-up questions only for information that's missing. If you provide everything upfront, it skips straight to generating your plan.
 
-| Round | What It Asks | Required |
-|-------|-------------|----------|
-| 1 | Wake-up time | Always |
-| 2 | Full-day plan or remaining-day plan | Always |
-| 3 | Fixed anchor events (meals, meetings, commute) | Always |
+| Round | What It Asks | When |
+|-------|-------------|------|
+| 1–3 (combined) | Wake-up time, plan scope, fixed anchor events | Always, in one message |
 | 4 | Today's task list | Only if not provided |
-| 5 | Duration, priority, and location per task | Only for missing fields |
+| 5 | Duration, priority, and location per task | Only for missing fields, one task at a time |
 | 6 | Focus level today + target end time | Always |
 
-After all rounds, Claude outputs a confirmation summary, then generates the full schedule.
+After all rounds, Claude outputs a one-paragraph confirmation summary, then generates the full schedule.
 
 ---
 
@@ -81,6 +84,7 @@ Each schedule block follows this structure:
 ```
 [Time slot] 🔵 Task name (duration) — One-sentence reason
 [Time slot] 😴 Break: recommended method (duration)
+[Time slot] 🍽️ Lunch (suggested) — adjust time if needed
 [Time slot] 🚌 Commute: Home → Café (20 min) — recommended: podcast / audiobook
 [Time slot] ⚪ Reply to emails (30 min) — energy trough; admin only
 ...
@@ -95,40 +99,51 @@ Each schedule block follows this structure:
 | 🟢 | Review / consolidation |
 | ⚪ | Admin / mechanical task |
 | 😴 | Break (method specified) |
-| 🚌 | Commute buffer |
+| 🍽️ | Lunch (fixed or auto-suggested) |
+| 🚌 | Commute buffer (placed right before destination task) |
 | ☕ | Dopamine cool-down / caffeine timing |
 | 🌙 | Relaxation / light reading / journaling |
+
+Only blocks with content are listed — empty time gaps are not explained.
 
 ---
 
 ## Example
 
 **User message:**
-> Wake up 6:30, gym 45 min. Tasks: LeetCode (60 min, high), reading notes (60 min, mid, café), reply emails (30 min, low, home), Anki review (30 min, mid, home), tech video (60 min, low, home). Focus: average. Done by 9 PM.
+> Wake up 6:30, gym 45 min. Tasks: LeetCode (60 min, high, home), reading notes (60 min, mid, café), reply emails (30 min, low, home), Anki review (30 min, mid, home), tech video (60 min, low, home). Focus: average. Done by 9 PM.
 
 **ChronoPlanner output (excerpt):**
 
 ```
 [06:30–07:15] 🏋️ Gym (45 min) — exercise elevates BDNF; deep focus window opens immediately after
 [07:15–08:15] ☕ Dopamine cool-down + breakfast (60 min) — no high-stimulation content; cortisol rising
-[08:15–09:00] 🔵 LeetCode (45 min) — peak cortisol window; hardest task first (Eat the Frog)
+[08:15–09:00] 🔵 LeetCode (45 min) — peak cortisol; hardest task first (Eat the Frog)
 [09:00–09:10] 😴 Break: look out the window / stretch (10 min)
 [09:10–09:55] 🔵 LeetCode continued (45 min)
 [09:55–10:05] 😴 Break: diaphragmatic breathing (10 min)
 [10:05–10:50] 🟡 Reading notes (45 min) — still in golden window; creative absorption
 [10:50–11:10] 🚌 Commute: Home → Café (20 min) — recommended: podcast or language listening
 [11:10–11:55] 🟡 Reading notes continued (45 min, @ Café)
-[11:55–13:00] 😴 Lunch break (65 min) — power nap 20 min if possible; outdoor walk without earphones
+[12:00–13:00] 🍽️ Lunch (suggested)
 [13:00–13:30] ⚪ Reply to emails (30 min) — energy trough; batched admin only
-[13:30–14:30] 🚌 Commute: Café → Home (20 min) + buffer — recommended: audiobook
 [14:30–15:15] 🟢 Anki review (45 min) — secondary peak; spaced repetition consolidates morning learning
-[15:15–15:25] 😴 Break: walk around / stretch (10 min)
-[15:25–16:25] ⚪ Tech video (60 min) — passive absorption; secondary peak used for lighter input
-[20:00–20:30] 🟢 Anki second pass (30 min) — memory consolidation window; pre-sleep review maximizes retention
+[15:25–16:25] ⚪ Tech video (60 min) — passive absorption; secondary peak
+[20:00–20:30] 🟢 Anki second pass (30 min) — memory consolidation window; pre-sleep review
 [20:30–21:00] 🌙 Wind down — journaling, light reading, no new information input
 
-📊 Summary: Deep focus 1.5h · Creative 1.5h · Review 1h · Admin 30min · Commute 40min · Total task time 5h · Done by 21:00 ✓
+📊 Summary: Deep focus 1.5h · Creative 1.5h · Review 1h · Admin 1h · Commute 20min · Done by 21:00 ✓
+
+Would you like me to add this plan to your Google Calendar?
 ```
+
+---
+
+## Google Calendar + Apple Calendar Sync
+
+After generating your plan, ChronoPlanner will ask if you'd like to add it to Google Calendar. If you say yes, it creates a separate calendar event for every block — tasks, breaks, commutes, and the dopamine cool-down window — using the Google Calendar MCP connector.
+
+If you have Google Calendar synced to your Apple Calendar on iPhone or Mac, events will appear there automatically.
 
 ---
 
@@ -136,9 +151,9 @@ Each schedule block follows this structure:
 
 The skill is designed to be forked and adapted. Common modifications:
 
-- **Different wake-up range** — edit the options in Round 1
+- **Different wake-up range** — edit the options in the opening questions
 - **Add your own morning routine types** — extend the morning habits section under Core Science Principles
-- **Change output language** — the skill responds in the user's language by default; you can hardcode a preferred language at the top of the file
+- **Change output language** — a Chinese version is available at `SKILL-CN.md`; you can also hardcode a preferred language at the top of `SKILL.md`
 - **Adjust focus block lengths** — edit the Poor / Average / Good table under Attention Span Principles
 
 ---
