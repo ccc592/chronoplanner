@@ -4,9 +4,7 @@
 
 > A Claude skill that builds your daily schedule around your biology — not a generic template.
 
-ChronoPlanner is a Claude skill that generates science-based daily plans grounded in **circadian rhythm research**, **attention span science**, and **dopamine regulation principles**. Instead of asking you to fill a calendar top-to-bottom, it matches each task to the time window where your brain is biologically primed to handle it.
-
-Also available in Chinese: [SKILL-CN.md](./SKILL-CN.md)
+ChronoPlanner is a Claude skill that generates science-based daily and weekly plans grounded in **circadian rhythm research**, **attention span science**, and **dopamine regulation principles**. It matches each task to the time window where your brain is biologically primed to handle it — and learns your patterns over time.
 
 ---
 
@@ -14,32 +12,38 @@ Also available in Chinese: [SKILL-CN.md](./SKILL-CN.md)
 
 Most AI planners treat all hours as equal. ChronoPlanner doesn't.
 
-It calculates your personal energy windows relative to your actual wake-up time, then schedules tasks accordingly — deep focus when cortisol peaks, admin during the trough, review before sleep. It also handles the practical friction that kills real plans: location changes, commute buffers, fixed anchor events, and fatigue prediction.
+It calculates your personal energy windows from your wake time, chronotype, and sleep quality — then schedules accordingly. Deep focus when cortisol peaks. Admin during the trough. Review before sleep. It also handles the practical friction that kills real plans.
 
-**Core principles built in:**
-- Auto-scans Google Calendar, Google Tasks, and Gmail before asking anything
-- Cortisol Awakening Response (CAR) and BDNF timing
-- Attention Residue Effect (23-minute recovery after task switches)
-- Dopamine cool-down before deep work
-- Task batching to minimize context switching
-- Eat the Frog — hardest task in the peak window
-- Active + Passive task stacking during commutes
-- Fatigue prediction — admin tasks when energy drops, not deep work
-- Deferred commute scheduling — commute blocks placed right before the destination task, not stranded hours early
-- Auto-inferred lunch block when not specified
-- Google Calendar sync — adds the full plan to your calendar after generation
+**Core features:**
+- **Pre-scan** — silently reads Google Calendar, Tasks, Gmail, Notion, Todoist, Slack, and weather before asking a single question
+- **Chronotype-aware** — 3-question MEQ assessment; Night Owl golden window shifts 3–4 hours later than Morning Lark
+- **Sleep-calibrated blocks** — sleep hours × subjective feel → precise focus block length (25 / 45 / 60–90 min)
+- **Dopamine cool-down** — 60-min protection window before deep work
+- **Task batching** — communications in fixed windows; creative work in continuous sessions
+- **Eat the Frog** — hardest task in the peak window, always
+- **Commute-aware** — detects location changes, inserts 🚌 commute blocks right before the destination task
+- **Task dependencies** — Task B only scheduled after Task A completes
+- **Weather-adaptive breaks** — outdoor breaks only if conditions are good
+- **Plan adjustment** — "my meeting moved to 3 PM" re-slots only affected blocks
+- **Menstrual cycle awareness** — optional; adjusts block length and break frequency by phase
+- **Weekly mode** — distributes tasks across Mon–Fri with a week-view summary
+- **End-of-day review** — triggered by "day done"; tracks completion rate and plan quality
+- **Pattern learning** — after 3+ sessions, suggests duration buffers for task types you consistently underestimate
+- **Habit tracking** — daily metrics stored in Google Sheets; weekly report on request
+- **Google Calendar / Notion / Obsidian output** — sync or export your plan after generation
 
 ---
 
 ## Who It's For
 
-✅ Students and knowledge workers with flexible schedules  
-✅ Anyone with a mix of deep work, admin, and errands in the same day  
-✅ People who exercise in the morning and want to leverage that window  
-✅ Anyone who's tried time-blocking but found it too rigid to maintain  
+✅ Students and knowledge workers with flexible schedules
+✅ Anyone juggling deep work, admin, and errands in the same day
+✅ People who exercise in the morning and want to leverage that window
+✅ Night owls who need a schedule that actually fits their biology
+✅ Anyone who's tried time-blocking but found it too rigid to maintain
 
-❌ Not ideal for people with fully fixed 9-to-5 schedules with no flexibility  
-❌ Not a task manager — it plans a single day at a time, not long-term projects  
+❌ Not ideal for fully fixed 9-to-5 schedules with no flexibility
+❌ Not a long-term project manager — plans one day or one week at a time
 
 ---
 
@@ -49,147 +53,139 @@ It calculates your personal energy windows relative to your actual wake-up time,
 
 1. Go to **Settings → Skills** in Claude.ai
 2. Create a new skill and paste the contents of `SKILL.md`
-3. Save — ChronoPlanner will activate automatically when you ask Claude to plan your day
+3. Save — ChronoPlanner activates automatically when you ask Claude to plan your day
+
+> **Note:** The `references/` folder contains supporting files that Claude loads on demand. Upload the full folder structure for best results.
 
 ### Option B — Claude Code
 
 ```bash
-mkdir -p ~/.claude/skills/chronoplanner
-curl -o ~/.claude/skills/chronoplanner/SKILL.md \
-  https://raw.githubusercontent.com/yitong0322/chronoplanner/main/SKILL.md
+git clone https://github.com/yitong0322/chronoplanner ~/.claude/skills/chronoplanner
 ```
 
 ### Option C — System Prompt (any Claude interface or API)
 
-Copy the full contents of `SKILL.md` and paste it into your system prompt field. Works with Claude API, Cursor, and any tool that accepts a system prompt.
+Paste the contents of `SKILL.md` into your system prompt. Works with Claude API, Cursor, and any tool that accepts a system prompt.
 
 ---
 
 ## How It Works
 
-ChronoPlanner starts by silently scanning your connected tools to pre-populate your plan, then asks only for what's still missing.
+### Step 0: Pre-Scan (Silent, Automatic)
 
-### Step 0: Pre-Scan (Automatic)
+Before asking anything, ChronoPlanner scans your connected tools and checks your memory:
 
-Before any questions, ChronoPlanner checks your connected tools:
+| Source | What It Does |
+|--------|-------------|
+| 🧠 Memory | Loads saved chronotype, wake time, calibration notes |
+| 📅 Google Calendar | Fetches today's events → auto-locked as anchors |
+| ✅ Google Tasks / Todoist / Linear / TickTick | Fetches tasks due today |
+| 📧 Gmail / Outlook | Scans for actionable emails (max 5) |
+| 📝 Notion | Surfaces pages tagged today or this week |
+| 💬 Slack | Scans mentions/DMs for action items (max 3) |
+| 🌤️ Weather | Fetches current conditions → affects break recommendations |
 
-| Tool | What It Does | Required |
-|------|-------------|----------|
-| Google Calendar | Fetches today's events → auto-locked as fixed anchors | Always (if connected) |
-| Google Tasks | Fetches your task list → suggested for confirmation | Optional |
-| Gmail / Outlook | Scans for actionable emails → surfaced for you to add | Optional |
+Unconnected tools are skipped silently. Results shown in one summary line before any questions.
 
-Results are shown in a single summary before the questionnaire starts:
-> "📅 Calendar: 2 events locked · ✅ Tasks: 4 found · 📧 Inbox: 2 actionable items"
+### Step 1: Intake Questionnaire
 
-Tools that aren't connected are skipped silently — no error messages.
-
-### Step 1–6: Intake Questionnaire
-
-ChronoPlanner then asks only for what the pre-scan didn't already answer.
+Asks only what the pre-scan didn't already answer — one combined message for the essentials, then per-task questions one at a time.
 
 | Round | What It Asks | When |
 |-------|-------------|------|
-| 1–3 (combined) | Wake-up time, plan scope, fixed anchor events | Always, in one message — skips anything pre-filled by calendar |
-| 4 | Today's task list | Only if not provided and not found in Google Tasks |
-| 5 | Duration, priority, and location per task | Only for missing fields, one task at a time |
-| 6 | Focus level today + target end time | Always |
+| 1–3 (combined) | Plan type (day/week), wake time, fixed anchors | Always; skips pre-filled fields |
+| 4 | Task list | Only if not found in pre-scan |
+| 5 | Duration, priority, location, dependencies | Only for missing fields, one task at a time |
+| 6 | Sleep hours + feel, chronotype (MEQ), target end time | Always |
 
-After all rounds, Claude outputs a one-paragraph confirmation summary, then generates the full schedule.
+### Step 2: Generate Plan
+
+Confirmation summary → full annotated schedule → offer to sync to Google Calendar, Notion, or Obsidian.
+
+### Step 3: End-of-Day Review (optional)
+
+Say **"day done"** at any time to trigger a 3-question review:
+- Which tasks completed / deferred / dropped?
+- Plan quality score (1–5)
+- Did your energy match the prediction?
+
+Results feed into Pattern Learning and Habit Tracking automatically.
 
 ---
 
 ## Output Format
 
-Each schedule block follows this structure:
-
 ```
-[Time slot] 🔵 Task name (duration) — One-sentence reason
-[Time slot] 😴 Break: recommended method (duration)
-[Time slot] 🍽️ Lunch (suggested) — adjust time if needed
-[Time slot] 🚌 Commute: Home → Café (20 min) — recommended: podcast / audiobook
-[Time slot] ⚪ Reply to emails (30 min) — energy trough; admin only
-...
+[Time] 🔵 Task (duration) — reason
+[Time] ☕ Dopamine cool-down (60 min) — no high-stimulation content
+[Time] 😴 Break: method (duration)
+[Time] 🍽️ Lunch (fixed / suggested)
+[Time] 🚌 Commute: Home → Café (20 min) — recommended: podcast
+[Time] 🕐 Buffer (15 min) — arrived early; settle in, review agenda
+[Time] 🕐 Free time (45 min) — freed by schedule change; use as you like
+[Time] ⚪ Admin task (duration) — energy trough; batched
 ```
 
-**Legend**
-
-| Icon | Meaning |
-|------|---------|
-| 🔵 | Deep focus task |
-| 🟡 | Creative / collaborative / skill practice |
-| 🟢 | Review / consolidation |
-| ⚪ | Admin / mechanical task |
-| 😴 | Break (method specified) |
-| 🍽️ | Lunch (fixed or auto-suggested) |
-| 🚌 | Commute buffer (placed right before destination task) |
-| ☕ | Dopamine cool-down / caffeine timing |
-| 🌙 | Relaxation / light reading / journaling |
-
-Only blocks with content are listed — empty time gaps are not explained.
+**Legend:** 🔵 Deep focus · 🟡 Creative/skill · 🟢 Review · ⚪ Admin · 😴 Break · 🍽️ Meal · 🚌 Commute · 🕐 Buffer/Free · ☕ Cool-down · 🌙 Relaxation
 
 ---
 
 ## Example
 
 **User message:**
-> Wake up 6:30, gym 45 min. Tasks: LeetCode (60 min, high, home), reading notes (60 min, mid, café), reply emails (30 min, low, home), Anki review (30 min, mid, home), tech video (60 min, low, home). Focus: average. Done by 9 PM.
+> Wake 7:00, Intermediate, 7.5h sleep feeling normal, gym 45 min. Lunch 12:30–13:30. Tasks: project report (90 min, high), LeetCode (60 min, high), emails (30 min, low), Anki (30 min, mid). End by 21:00.
 
-**ChronoPlanner output (excerpt):**
-
+**Output (excerpt):**
 ```
-[06:30–07:15] 🏋️ Gym (45 min) — exercise elevates BDNF; deep focus window opens immediately after
-[07:15–08:15] ☕ Dopamine cool-down + breakfast (60 min) — no high-stimulation content; cortisol rising
-[08:15–09:00] 🔵 LeetCode (45 min) — peak cortisol; hardest task first (Eat the Frog)
-[09:00–09:10] 😴 Break: look out the window / stretch (10 min)
-[09:10–09:55] 🔵 LeetCode continued (45 min)
-[09:55–10:05] 😴 Break: diaphragmatic breathing (10 min)
-[10:05–10:50] 🟡 Reading notes (45 min) — still in golden window; creative absorption
-[10:50–11:10] 🚌 Commute: Home → Café (20 min) — recommended: podcast or language listening
-[11:10–11:55] 🟡 Reading notes continued (45 min, @ Café)
-[12:00–13:00] 🍽️ Lunch (suggested)
-[13:00–13:30] ⚪ Reply to emails (30 min) — energy trough; batched admin only
-[14:30–15:15] 🟢 Anki review (45 min) — secondary peak; spaced repetition consolidates morning learning
-[15:25–16:25] ⚪ Tech video (60 min) — passive absorption; secondary peak
-[20:00–20:30] 🟢 Anki second pass (30 min) — memory consolidation window; pre-sleep review
-[20:30–21:00] 🌙 Wind down — journaling, light reading, no new information input
+[07:00–07:45] 🏋️ Gym (45 min) — BDNF boost; focus window opens immediately after
+[07:45–08:45] ☕ Dopamine cool-down + breakfast (60 min)
+[08:45–09:30] 🔵 Project report (45 min) — peak cortisol; Eat the Frog
+[09:30–09:40] 😴 Break: step outside (10 min)
+[09:40–10:25] 🔵 Project report cont. (45 min)
+[10:25–10:35] 😴 Break: diaphragmatic breathing (10 min)
+[10:35–11:20] 🔵 Project report cont. (45 min)
+[11:20–11:30] 😴 Break: walk outside (10 min)
+[12:30–13:30] 🍽️ Lunch (fixed anchor)
+[13:30–14:00] ⚪ Emails (30 min) — energy trough; batched admin
+[14:00–15:00] 🔵 LeetCode (60 min) — afternoon secondary peak
+[19:30–20:00] 🟢 Anki (30 min) — memory consolidation window
+[20:00–21:00] 🌙 Wind down
 
-📊 Summary: Deep focus 1.5h · Creative 1.5h · Review 1h · Admin 1h · Commute 20min · Done by 21:00 ✓
+📊 Deep focus 3.75h · Admin 30min · Review 30min · Done by 21:00 ✓
 
-Would you like me to add this plan to your Google Calendar?
+Would you like me to add this to your Google Calendar?
 ```
 
 ---
 
-## Google Calendar + Apple Calendar Sync
+## File Structure
 
-After generating your plan, ChronoPlanner will ask if you'd like to add it to Google Calendar. If you say yes, it creates a separate calendar event for every block — tasks, breaks, commutes, and the dopamine cool-down window — using the Google Calendar MCP connector.
-
-If you have Google Calendar synced to your Apple Calendar on iPhone or Mac, events will appear there automatically.
-
----
-
-## Customization
-
-The skill is designed to be forked and adapted. Common modifications:
-
-- **Different wake-up range** — edit the options in the opening questions
-- **Add your own morning routine types** — extend the morning habits section under Core Science Principles
-- **Change output language** — a Chinese version is available at `SKILL-CN.md`; you can also hardcode a preferred language at the top of `SKILL.md`
-- **Adjust focus block lengths** — edit the Poor / Average / Good table under Attention Span Principles
+```
+chronoplanner/
+├── SKILL.md              # Core logic — install this
+├── SKILL-CN.md           # Chinese version
+├── README.md             # This file
+├── README-CN.md          # Chinese README
+├── TODO.md               # Roadmap and changelog
+├── LICENSE
+└── references/           # Loaded by Claude on demand
+    ├── science.md        # Hormonal rhythm, attention, dopamine science
+    ├── break-protocol.md # Break recommendations by type
+    ├── scheduling.md     # Scheduling rules + weekly mode
+    ├── tracking.md       # End-of-day review, pattern learning, weekly report
+    └── examples.md       # Worked examples
+```
 
 ---
 
 ## Scientific Background
 
-ChronoPlanner draws on the following research areas:
-
-- **Cortisol Awakening Response (CAR)** — the post-wake cortisol surge that primes executive function
-- **BDNF and exercise** — aerobic exercise elevates brain-derived neurotrophic factor, enhancing learning readiness
-- **Attention Residue Effect** — Sophie Leroy's research on the cognitive cost of task switching (~23 min recovery)
-- **Dopamine baseline regulation** — Anna Lembke's work on high-stimulation content and its effect on baseline motivation
-- **Two-process model of sleep regulation** — circadian rhythm + sleep pressure interaction
-- **Spaced repetition and memory consolidation** — pre-sleep review and its effect on overnight memory processing
+- **Cortisol Awakening Response (CAR)** — post-wake cortisol surge primes prefrontal cortex
+- **BDNF and exercise** — aerobic training elevates brain-derived neurotrophic factor for 2–4 hours
+- **Attention Residue Effect** (Sophie Leroy, 2009) — task switches cost ~23 min of recovery
+- **Dopamine baseline regulation** (Anna Lembke) — high-stimulation content raises baseline, causing structural resistance to focused work
+- **Two-process model of sleep** — circadian rhythm + sleep pressure interaction
+- **Spaced repetition and memory consolidation** — pre-sleep review maximizes overnight retention
 
 ---
 
@@ -202,3 +198,5 @@ MIT — free to use, modify, and redistribute.
 ## Contributing
 
 PRs welcome. If you've tested a modification that improves output quality, open a PR with a brief description of what changed and why.
+
+Found a bug or have a feature idea? Open an issue.
