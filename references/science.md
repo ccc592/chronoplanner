@@ -80,14 +80,3 @@ Load this file when you need to explain the scientific basis of scheduling decis
 | High-Stimulation Entertainment | Social media, games, short videos | Fixed slot only — never adjacent to deep work |
 
 ---
-
-## Menstrual Cycle and Cognitive Performance
-
-*Only reference this section if the user has opted into cycle-aware planning.*
-
-Hormonal fluctuations across the menstrual cycle significantly affect focus capacity, energy, and emotional regulation:
-
-- **Follicular phase (days 1–13):** Rising estrogen supports executive function, mood stability, and verbal fluency. Standard or ambitious scheduling is appropriate.
-- **Ovulatory phase (days 14–16):** Estrogen peaks. Social cognition and communication are heightened — good for collaborative or creative tasks.
-- **Luteal phase (days 17–28):** Progesterone rises and estrogen falls. Concentration may be harder, fatigue more pronounced. Reduce block lengths by one tier; add one extra break per 3-hour window.
-- **Menstrual phase (days 1–5, overlapping):** Prostaglandins and hormonal shifts can cause fatigue, pain, and reduced focus capacity. Treat as a low-energy day regardless of sleep score — prioritize admin, light review, and rest.

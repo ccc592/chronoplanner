@@ -1,5 +1,7 @@
 # ChronoPlanner — Tracking Reference
 
+> Hermes fork: in coach mode (`~/coach/config.json` exists) the end-of-day review is run by `gps-daily` (evening review) and daily metrics live in `~/coach/tracking/`. Use this file for the Pattern Learning rules; store calibration notes in `~/coach/calibration.md` instead of Claude memory, and skip Google Sheets.
+
 Load this file when:
 - User says "day done", "wrap up", "end of day", "I'm done for today", or similar
 - User asks for a weekly report or productivity summary
@@ -99,7 +101,7 @@ When a task type has a calibration note, surface the buffer suggestion before ap
 
 ### Storage options
 
-**Option A — Claude Memory (always available):**
+**Option A — Hermes memory (always available):**
 Store a rolling 7-day summary as a memory note:
 > "ChronoPlanner weekly summary (week of Apr 14):
 > Avg deep focus: 3.2h/day · Avg completion rate: 78% · Avg quality score: 3.8
@@ -154,9 +156,9 @@ If data is stored in Google Sheets, pull from the sheet for the report. If only 
 
 | Data | Primary storage | Fallback |
 |------|----------------|---------|
-| Task duration calibration | Claude memory (memory_user_edits) | Claude memory only |
-| Daily metrics | Google Sheets row | Claude memory rolling summary |
-| Weekly report source | Google Sheets (7 rows) | Claude memory summary |
-| Calibration notes | Claude memory (memory_user_edits) | Claude memory only |
+| Task duration calibration | Hermes memory / `~/coach/calibration.md` | Hermes memory only |
+| Daily metrics | Google Sheets row | Hermes memory rolling summary |
+| Weekly report source | Google Sheets (7 rows) | Hermes memory summary |
+| Calibration notes | Hermes memory / `~/coach/calibration.md` | Hermes memory only |
 
-**Privacy note:** Never store specific task names or content in Google Sheets without user consent. Store only metrics (duration, completion rate, scores). Task names stay in Claude memory only if the user has provided them in context.
+**Privacy note:** Never store specific task names or content in Google Sheets without user consent. Store only metrics (duration, completion rate, scores). Task names stay in Hermes memory only if the user has provided them in context.
