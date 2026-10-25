@@ -228,6 +228,8 @@ the exact CLI; shorthand `GAPI="python ${HERMES_HOME:-$HOME/.hermes}/skills/prod
 - One event per **deep / shallow / anchor** block (no break events). Summary =
   `config.calendar.event_prefix` (default `[教练]`) + emoji + title; description =
   the lead action in one sentence. Times with the explicit offset (`+08:00`).
+- Always target `config.calendar.calendar_id`: pass `--calendar <calendar_id>` on
+  every `calendar list` / `create` / `delete` call, never the default calendar.
 - Re-planning a day: delete that day's previous coach events first (ids from the
   plan JSON `calendar_event_ids`, falling back to listing the day and matching the
   prefix), then create the new set and store the new ids. Never touch events
