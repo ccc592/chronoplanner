@@ -1,6 +1,6 @@
 # ChronoPlanner — Tracking Reference
 
-> Hermes fork: in coach mode (`~/coach/config.json` exists) the end-of-day review is run by `gps-daily` (evening review) and daily metrics live in `~/coach/tracking/`. Use this file for the Pattern Learning rules; store calibration notes in `~/coach/calibration.md` instead of Claude memory, and skip Google Sheets.
+> In coach mode (`~/coach/config.json` exists) the end-of-day review is run by `gps-daily` (evening review) and daily metrics live in `~/coach/tracking/`. Use this file for the Pattern Learning rules; store calibration notes in `~/coach/calibration.md` instead of Claude memory, and skip Google Sheets.
 
 Load this file when:
 - User says "day done", "wrap up", "end of day", "I'm done for today", or similar
