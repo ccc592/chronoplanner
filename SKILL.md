@@ -18,6 +18,7 @@ directly. Do **not** run the intake questionnaire below; everything comes from f
 | Sleep target / end of day | `config.day.sleep_target` |
 | Anchors | `config.day.gym` (on its days), fixed items the owner mentioned in the evening review, Google Calendar events for the date (only if `config.calendar.enabled`) |
 | Deep tasks | each active goal's process target and next lead action (`~/coach/goals/<cycle>/`), operating procedure if present |
+| Inbox tasks | open tasks in his Google Tasks inbox (only if `config.tasks.enabled`): load `coach-tasks`, place at most two into free time by its placement rules |
 | How many deep blocks | `config.day.deep_blocks_per_day`, adjusted by `~/coach/state.json` intensity (`push` may add one, `rebuild` may cut to one shorter block), never above `config.day.deep_cap_hours` |
 | Duration calibration | `~/coach/calibration.md` (replaces Claude memory notes) |
 | Chronotype | `~/coach/profile.md`; default Intermediate relative to T |
