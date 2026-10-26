@@ -234,6 +234,13 @@ the exact CLI; shorthand `GAPI="python ${HERMES_HOME:-$HOME/.hermes}/skills/prod
   plan JSON `calendar_event_ids`, falling back to listing the day and matching the
   prefix), then create the new set and store the new ids. Never touch events
   without the prefix.
+- Moving **one** block mid-day (owner starts late, block re-slotted): the CLI has no
+  update verb — `calendar delete <event_id> --calendar <calendar_id>`, then
+  `calendar create` the same summary at the new times, and replace the old id in
+  `calendar_event_ids`. Verify by listing the day and checking the new start/end
+  before reporting it as done. In the same turn, edit the matching line in
+  `plans/<date>.md` — the `.md` is what the owner reads on his phone, and a stale
+  time there contradicts both the calendar and the JSON.
 - Confirm with the count ("已同步 4 个日历事件"). If Calendar is not authenticated,
   say so once and continue without it; Telegram reminders then cover block starts.
 
